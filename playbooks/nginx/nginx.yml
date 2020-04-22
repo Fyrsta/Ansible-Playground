@@ -6,7 +6,7 @@
     pcreversion: 8.44
     zlibversion: 1.2.11
     opensslversion: 1.1.1f
-    nginxinstalldir: "{{nginxdir}}/nginx-{{nginxversion}}"
+    nginxinstalldir: "{{ nginxdir }}/nginx-{{ nginxversion }}"
     vhostdir: /var/www
     domain: ansible-test.proxious.com
     letsencryptemail: dan@proxious.com
@@ -20,7 +20,7 @@
         name: epel-release
     - name: Install packages
       yum:
-        name: "{{packages}}"
+        name: "{{ packages }}"
       vars:
         packages:
           - vim
@@ -54,42 +54,32 @@
     - name: Create directory
       file:
         state: directory
-        path: "{{nginxdir}}"
-    - name: Download Nginx
+        path: "{{ nginxdir }}"
+    - name: Download Sources
       unarchive:
-        src: "https://nginx.org/download/nginx-{{nginxversion}}.tar.gz"
-        dest: "{{nginxdir}}"
+        src: "{{ item }}"
+        dest: "{{ nginxdir }}"
         remote_src: true
-    - name: Download PCRE
-      unarchive:
-        src: "https://ftp.pcre.org/pub/pcre/pcre-{{pcreversion}}.tar.gz"
-        dest: "{{nginxdir}}"
-        remote_src: true
-    - name: Download zlib
-      unarchive:
-        src: "https://www.zlib.net/zlib-{{zlibversion}}.tar.gz"
-        dest: "{{nginxdir}}"
-        remote_src: true
-    - name: Download OpenSSL
-      unarchive:
-        src: "https://www.openssl.org/source/openssl-{{opensslversion}}.tar.gz"
-        dest: "{{nginxdir}}"
-        remote_src: true
+      loop:
+          - "https://nginx.org/download/nginx-{{ nginxversion }}.tar.gz"
+          - "https://ftp.pcre.org/pub/pcre/pcre-{{ pcreversion }}.tar.gz"
+          - "https://www.zlib.net/zlib-{{ zlibversion }}.tar.gz"
+          - "https://www.openssl.org/source/openssl-{{ opensslversion }}.tar.gz"
     - name: Install Nginx man pages
       copy:
-        src: "{{nginxinstalldir}}/man/nginx.8"
+        src: "{{ nginxinstalldir }}/man/nginx.8"
         dest: /usr/share/man/man8
         remote_src: true
     - name: Configure Nginx
-      command: "./configure --prefix=/etc/nginx --sbin-path=/usr/sbin/nginx --modules-path=/usr/lib64/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --pid-path=/var/run/nginx.pid --lock-path=/var/run/nginx.lock --user=nginx --group=nginx --build=CentOS --builddir=nginx-1.13.2 --with-select_module --with-poll_module --with-threads --with-file-aio --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_addition_module --with-http_xslt_module=dynamic --with-http_image_filter_module=dynamic --with-http_geoip_module=dynamic --with-http_sub_module --with-http_dav_module --with-http_flv_module --with-http_mp4_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_auth_request_module --with-http_random_index_module --with-http_secure_link_module --with-http_degradation_module --with-http_slice_module --with-http_stub_status_module --http-log-path=/var/log/nginx/access.log --http-client-body-temp-path=/var/cache/nginx/client_temp --http-proxy-temp-path=/var/cache/nginx/proxy_temp --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp --http-scgi-temp-path=/var/cache/nginx/scgi_temp --with-mail=dynamic --with-mail_ssl_module --with-stream=dynamic --with-stream_ssl_module --with-stream_realip_module --with-stream_geoip_module=dynamic --with-stream_ssl_preread_module --with-compat --with-pcre={{nginxdir}}/pcre-{{pcreversion}} --with-pcre-jit --with-zlib={{nginxdir}}/zlib-{{zlibversion}} --with-openssl={{nginxdir}}/openssl-{{opensslversion}} --with-openssl-opt=no-nextprotoneg --with-debug"
+      command: "./configure --prefix=/etc/nginx --sbin-path=/usr/sbin/nginx --modules-path=/usr/lib64/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --pid-path=/var/run/nginx.pid --lock-path=/var/run/nginx.lock --user=nginx --group=nginx --build=CentOS --builddir=nginx-1.13.2 --with-select_module --with-poll_module --with-threads --with-file-aio --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_addition_module --with-http_xslt_module=dynamic --with-http_image_filter_module=dynamic --with-http_geoip_module=dynamic --with-http_sub_module --with-http_dav_module --with-http_flv_module --with-http_mp4_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_auth_request_module --with-http_random_index_module --with-http_secure_link_module --with-http_degradation_module --with-http_slice_module --with-http_stub_status_module --http-log-path=/var/log/nginx/access.log --http-client-body-temp-path=/var/cache/nginx/client_temp --http-proxy-temp-path=/var/cache/nginx/proxy_temp --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp --http-scgi-temp-path=/var/cache/nginx/scgi_temp --with-mail=dynamic --with-mail_ssl_module --with-stream=dynamic --with-stream_ssl_module --with-stream_realip_module --with-stream_geoip_module=dynamic --with-stream_ssl_preread_module --with-compat --with-pcre={{ nginxdir }}/pcre-{{ pcreversion }} --with-pcre-jit --with-zlib={{ nginxdir }}/zlib-{{ zlibversion }} --with-openssl={{ nginxdir }}/openssl-{{ opensslversion }} --with-openssl-opt=no-nextprotoneg --with-debug"
       args:
-        chdir: "{{nginxinstalldir}}"
+        chdir: "{{ nginxinstalldir }}"
     - name: Make Nginx
       make:
-        chdir: "{{nginxinstalldir}}"
+        chdir: "{{ nginxinstalldir }}"
     - name: Make Install Nginx
       make:
-        chdir: "{{nginxinstalldir}}"
+        chdir: "{{ nginxinstalldir }}"
         target: install
     - name: Symlink nginx modules
       file:
@@ -110,7 +100,7 @@
         group: nginx
     - name: Create nginx directory structure
       file:
-        path: "{{item}}"
+        path: "{{ item }}"
         state: directory
         owner: nginx
         group: nginx
@@ -119,7 +109,7 @@
       loop:
           - "/etc/nginx/sites-available"
           - "/etc/nginx/sites-enabled"
-          - "{{vhostdir}}/{{domain}}"
+          - "{{ vhostdir }}/{{ domain }}"
     - name: Nginx service file
       copy:
         src: nginx-service
@@ -130,22 +120,22 @@
         dest: /etc/nginx/nginx.conf
     - name: Create virtualhost
       template:
-        src: vhost.tpl
-        dest: "/etc/nginx/sites-available/{{domain}}.conf"
+        src: vhost.j2
+        dest: "/etc/nginx/sites-available/{{ domain }}.conf"
         owner: nginx
         group: nginx
         mode: 0775
     - name: Create virtualhost
       template:
-        src: sitetemplate.tpl
-        dest: "{{vhostdir}}/{{domain}}/index.html"
+        src: sitetemplate.j2
+        dest: "{{ vhostdir }}/{{ domain }}/index.html"
         owner: nginx
         group: nginx
         mode: 0775
     - name: Symlink nginx modules
       file:
-        src: "/etc/nginx/sites-available/{{domain}}.conf"
-        dest: "/etc/nginx/sites-enabled/{{domain}}.conf"
+        src: "/etc/nginx/sites-available/{{ domain }}.conf"
+        dest: "/etc/nginx/sites-enabled/{{ domain }}.conf"
         state: link
     - name: Start nginx
       systemd:
@@ -153,7 +143,7 @@
         name: nginx
         enabled: yes
     - name: Obtain certificate
-      command: "certbot --nginx -d {{domain}} --non-interactive --agree-tos -m {{letsencryptemail}}"
+      command: "certbot --nginx -d {{ domain }} --non-interactive --agree-tos -m {{ letsencryptemail }}"
     - name: Install cerbot crontab
       cron:
         name: "Renew Let's Encrypt SSL"
@@ -161,7 +151,7 @@
         hour: 3
         job: "/usr/bin/certbot renew --quiet"
     - name: Enable HTTP2
-      command: "sed -i 's/listen 443 ssl;/listen 443 ssl http2;/' /etc/nginx/sites-available/{{domain}}.conf"
+      command: "sed -i 's/listen 443 ssl;/listen 443 ssl http2;/' /etc/nginx/sites-available/{{ domain }}.conf"
     - name: Reload nginx
       systemd:
         state: restarted
